@@ -1,0 +1,257 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "type": "object",
+  "properties": {
+    "schemaStamp": {"$ref": "common.json#/schemaStamp"},
+
+    "instrumentName": {
+      "$ref": "common.json#/instrumentName",
+      "default": "EQSANS"
+    },
+
+    "iptsNumber":        {"$ref":  "common.json#/iptsNumber"},
+    "dataDirectories":   {"$ref":  "common.json#/dataDirectories"},
+    "sample": {
+      "type": "object",
+      "properties" : {
+        "runNumber": {
+          "$ref": "common.json#/definitions/runNumberTypes",
+          "description": "The run number(s) for the sample. The sample filename will be EQSANS_{runNumber}.nxs.h5",
+          "examples": ["12345", 12345]
+        },
+        "thickness": {
+          "anyOf": [{"type": "string", "minLength": 1}, {"type": "number", "exclusiveMinimum": 0}],
+          "default": 1.0, "description": "The sample thickness in cm"
+        },
+        "transmission": {
+          "type": "object",
+          "properties": {
+            "runNumber": {
+              "$ref": "common.json#/definitions/runNumberOptionalTypes",
+              "description": "The run number(s) for the transmission sample. The filename will be EQSANS_{runNumber}.nxs.h5",
+              "examples": ["12345", 12345]
+            },
+            "value": {"$ref": "common.json#/definitions/transmissionValueTypes"}
+          },
+          "maxProperties": 2,
+          "required": ["runNumber", "value"],
+          "description": "The transmission for the sample, run number or value (0 < value <=1). Can be empty",
+          "examples": ["0.9", 1.0]
+        }
+      },
+      "maxProperties": 3,
+      "required": ["runNumber", "thickness", "transmission"]
+    },
+    "background":        {"$ref":  "common.json#/background"},
+    "emptyTransmission": {"$ref":  "common.json#/emptyTransmission"},
+    "beamCenter":        {"$ref":  "common.json#/beamCenter"},
+    "outputFileName":    {"$ref":  "common.json#/outputFileName"},
+
+    "configuration": {
+      "type": "object",
+      "properties": {
+
+        "outputDir": {"$ref":  "common.json#/configuration/outputDir"},
+
+        "useTimeSlice":      {"$ref":  "common.json#/configuration/useTimeSlice", "default": false},
+        "timeSliceInterval": {"$ref":  "common.json#/configuration/timeSliceInterval", "default":  300},
+
+        "useLogSlice":      {"$ref":  "common.json#/configuration/useLogSlice", "default": false},
+        "logSliceName":     {"$ref":  "common.json#/configuration/logSliceName"},
+        "logSliceInterval": {"$ref":  "common.json#/configuration/logSliceInterval", "default":  10},
+
+        "cutTOFmin": {
+          "$ref":  "common.json#/definitions/safeStringNonNegativeFloat",
+          "default": 500.0,
+          "description": "User defined time of flight range minimum",
+          "pairedTo": "#configuration/cutTOFmax"
+        },
+        "cutTOFmax": {
+          "$ref":  "common.json#/definitions/safeStringNonNegativeFloat",
+          "default": 2000.0,
+          "description": "User defined time of flight range maximum",
+          "pairedTo": "#configuration/cutTOFmin"
+        },
+
+        "wavelengthStep": {"$ref":  "common.json#/definitions/safeStringPositiveFloat", "default": 0.1,
+                           "description": "Wavelength step. The loaded data files are transformed into wavelength in angstroms, then binned with this step"},
+        "wavelengthStepType": {
+          "type": "string", "enum": ["constant Delta lambda",  "constant Delta lambda/lambda"],
+          "default": "constant Delta lambda",
+          "examples": ["constant Delta lambda",  "constant Delta lambda/lambda"],
+          "description": "Type of binning. Options are 'constant Delta lambda' and 'constant Delta lambda/lambda. Currently only 'constant Delta lambda' is implemented."
+        },
+
+        "sampleOffset":           {"$ref":  "common.json#/configuration/sampleOffset", "default":  314.5},
+        "useDetectorOffset":      {"$ref":  "common.json#/configuration/useDetectorOffset", "default": true,
+                                   "useEntry": "#configuration/detectorOffset"},
+        "detectorOffset":         {"$ref":  "common.json#/configuration/detectorOffset", "default": 80},
+        "sampleApertureSize":     {"$ref":  "common.json#/configuration/sampleApertureSize"},
+        "sourceApertureDiameter": {
+          "$ref":  "common.json#/configuration/sourceApertureDiameter",
+          "description": "diameter of the source aperture (mm).  Use the value to override the value determined form the three slit wheels."
+        },
+        "usePixelCalibration": {"$ref":  "common.json#/configuration/usePixelCalibration", "default": false},
+
+        "maskFileName":     {"$ref":  "common.json#/configuration/maskFileName",
+          "default": "/SNS/EQSANS/shared/NeXusFiles/EQSANS/2020A_mp/mask_4m_general.nxs"},
+        "useDefaultMask":   {"$ref":  "common.json#/configuration/useDefaultMask", "default": true},
+        "defaultMask":      {"$ref":  "common.json#/configuration/defaultMask"},
+        "useMaskBackTubes": {"$ref":  "common.json#/configuration/useMaskBackTubes", "default": false},
+
+        "darkFileName":    {"$ref":  "common.json#/configuration/darkFileName",
+          "default":  "/SNS/EQSANS/shared/NeXusFiles/EQSANS/2020A_mp/EQSANS_113569.nxs.h5"},
+        "normalization": {
+          "anyOf": [{"type": "string", "enum": ["Monitor", "Total charge", "Time"]},
+                    {"type": "null"}],
+          "description": "Normalization type. Allowed values 'Total charge', 'Time', 'Monitor'",
+          "fluxfiletof": {"Monitor": "#configuratin/fluxMonitorRatioFile",
+                          "Total Charge": "#configuration/beamFluxFileName"},
+          "examples":  ["Monitor", "Total charge", "Time"],
+          "default": "Total charge"
+        },
+        "fluxMonitorRatioFile": {
+          "type": ["string", "null"],
+          "datasource": "file",
+          "description": "Path to the monitor flux ratio file (used in normalization by monitor)",
+          "examples": ["/path/to/file/fluxMonitorRatio.dat"]
+        },
+        "beamFluxFileName": {
+          "type": ["string", "null"],
+          "datasource": "file",
+          "description": "Path to the flux file (used in normalization by proton charge)",
+          "examples":  ["/path/to/file/beamFluxfile.dat"],
+          "default": "/SNS/EQSANS/shared/instrument_configuration/bl6_flux_at_sample"
+        },
+        "sensitivityFileName":        {"$ref":  "common.json#/configuration/sensitivityFileName",
+          "default": "/SNS/EQSANS/shared/NeXusFiles/EQSANS/2020A_mp/Sensitivity_patched_thinPMMA_4m_113512_mantid.nxs"},
+        "useSolidAngleCorrection":    {"$ref":  "common.json#/configuration/useSolidAngleCorrection", "default": true},
+        "useThetaDepTransCorrection": {"$ref":  "common.json#/configuration/useThetaDepTransCorrection", "default": true},
+        "mmRadiusForTransmission": {
+          "$ref": "common.json#/definitions/safeStringPositiveFloatNotNone",
+          "description": "Integration radius (in mm) to be used for transmission calculation",
+          "default": 25
+        },
+        "absoluteScaleMethod":   {"$ref":  "common.json#/configuration/absoluteScaleMethod", "default":  "standard"},
+        "StandardAbsoluteScale": {"$ref":  "common.json#/configuration/StandardAbsoluteScale", "default": 1.0},
+
+        "numQxQyBins":          {"$ref":  "common.json#/configuration/numQxQyBins", "default":  80},
+        "1DQbinType":           {"$ref":  "common.json#/configuration/1DQbinType", "default": "scalar"},
+        "QbinType": {
+          "$ref":  "common.json#/configuration/QbinType",
+          "default": "log",
+          "evaluateCondition": "('{this}' == 'linear' and {#configuration/numQBins} is not None) or ('{this}' == 'log' and (({#configuration/numQBins} is None) ^ ({#configuration/LogQBinsPerDecade} is None)))"
+        },
+        "numQBins":             {"$ref":  "common.json#/configuration/numQBins"},
+        "LogQBinsPerDecade":    {"$ref":  "common.json#/configuration/LogQBinsPerDecade"},
+        "useLogQBinsDecadeCenter": {"$ref":  "common.json#/configuration/useLogQBinsDecadeCenter", "default": false},
+        "useLogQBinsEvenDecade":   {"$ref":  "common.json#/configuration/useLogQBinsEvenDecade", "default": false},
+
+        "WedgeMinAngles":            {"$ref":  "common.json#/configuration/WedgeMinAngles"},
+        "WedgeMaxAngles":            {"$ref":  "common.json#/configuration/WedgeMaxAngles"},
+        "autoWedgeQmin":             {"$ref":  "common.json#/configuration/autoWedgeQmin", "default":  0.003},
+        "autoWedgeQmax":             {"$ref":  "common.json#/configuration/autoWedgeQmax", "default":  0.04},
+        "autoWedgeQdelta":           {"$ref":  "common.json#/configuration/autoWedgeQdelta", "default":  0.01},
+        "autoWedgeAzimuthalDelta":  {"$ref":  "common.json#/configuration/autoWedgeAzimuthalDelta", "default": 1.0},
+        "autoWedgePeakWidth":        {"$ref":  "common.json#/configuration/autoWedgePeakWidth", "default":  0.25},
+        "autoWedgeBackgroundWidth":  {"$ref":  "common.json#/configuration/autoWedgeBackgroundWidth", "default": 1.5},
+        "autoWedgeSignalToNoiseMin": {"$ref":  "common.json#/configuration/autoWedgeSignalToNoiseMin", "default": 2.0},
+        "AnnularAngleBin":           {"$ref":  "common.json#/configuration/AnnularAngleBin", "default": 1.0},
+
+        "Qmin":              {"$ref":  "common.json#/configuration/Qmin"},
+        "Qmax":              {"$ref":  "common.json#/configuration/Qmax"},
+        "useErrorWeighting": {"$ref":  "common.json#/configuration/useErrorWeighting", "default": false},
+        "smearingPixelSizeX": {"$ref":  "common.json#/configuration/smearingPixelSizeX", "default": 0.011},
+        "smearingPixelSizeY": {"$ref":  "common.json#/configuration/smearingPixelSizeY", "default": 0.007},
+        "useSubpixels":      {"$ref":  "common.json#/configuration/useSubpixels", "default": false,
+                              "useEntry": ["#configuration/subpixelsX", "#configuration/subpixelsY"]},
+        "subpixelsX":        {"$ref":  "common.json#/configuration/subpixelsX"},
+        "subpixelsY":        {"$ref":  "common.json#/configuration/subpixelsY"},
+
+        "useSliceIDxAsSuffix": {"type": "boolean", "default": false,
+                                "description": "If True, suffix is the slice index. If False, suffix is a composite (time, custom log values)",
+                                "examples": [true, false]},
+        "fitInelasticIncoh": {"type": "boolean", "default": false,
+                              "description": "Enable inelastic incoherent scattering processing"},
+        "incohfit_intensityweighted": {"type": "boolean", "default": false,
+				       "description": "If the intensity weighted method is used to calculate incoherent scattering correction"},
+        "incohfit_qmin": {
+	    "$ref": "common.json#/definitions/safeStringPositiveFloat",
+	    "default": null,
+	    "pairedTo": "#configuration/incohfit_qmax",
+	    "lessThan": "#configuration/incohfit_qmax",
+	    "description": "manually set the QMin for incoherent scattering calculation, if not set maximum valid range will be used"
+	},
+        "incohfit_qmax": {
+	    "$ref": "common.json#/definitions/safeStringPositiveFloat",
+	    "default": null,
+	    "pairedTo": "#configuration/incohfit_qmin",
+	    "description": "manually set the QMax for incoherent scattering calculation, if not set maximum valid range will be used"
+	},
+        "incohfit_factor": {
+	    "$ref": "common.json#/definitions/safeStringPositiveFloat",
+	    "default": null,
+	    "description": "if set the qmin and qmax will be automatically determined by checking the intensity profile"
+	},
+        "elasticReference": {
+          "type": "object",
+          "properties" : {
+            "runNumber": {
+              "$ref": "common.json#/definitions/runNumberOptionalTypes",
+              "description": "The run number(s) for the sample. The sample filename will be EQSANS_{runNumber}.nxs.h5",
+              "examples": ["12345", 12345],
+              "default": null
+            },
+            "thickness": {
+              "anyOf": [{"type": "string", "minLength": 1}, {"type": "number", "exclusiveMinimum": 0}],
+              "default": 1.0, "description": "The sample thickness in cm"
+            },
+            "transmission": {
+              "type": "object",
+              "properties": {
+                "runNumber": {
+                  "$ref": "common.json#/definitions/runNumberOptionalTypes",
+                  "description": "The run number(s) for the transmission sample. The filename will be EQSANS_{runNumber}.nxs.h5",
+                  "examples": ["12345", 12345],
+                  "default": null
+                },
+                "value": {
+                  "$ref": "common.json#/definitions/transmissionValueTypes",
+                  "default": null
+                }
+              },
+              "maxProperties": 2,
+              "required": ["runNumber", "value"],
+              "description": "The transmission for the sample, run number or value (0 < value <=1). Can be empty",
+              "examples": ["0.9", 1.0]
+            }
+          },
+          "maxProperties": 3,
+          "required": ["runNumber", "thickness", "transmission"]
+        },
+        "elasticReferenceBkgd": {"$ref":  "common.json#/background"},
+        "selectMinIncoh": {"type": "boolean", "default": false,
+                           "description": "use smallest wavelength as reference wavelength"}
+      },
+      "maxProperties": 64,
+      "required": ["outputDir", "useTimeSlice", "timeSliceInterval", "useLogSlice", "logSliceName",
+        "logSliceInterval", "sampleOffset", "useDetectorOffset", "detectorOffset",
+        "sampleApertureSize", "sourceApertureDiameter","usePixelCalibration",
+        "maskFileName", "useDefaultMask", "defaultMask", "useMaskBackTubes", "darkFileName",
+        "sensitivityFileName", "useSolidAngleCorrection", "useThetaDepTransCorrection",
+        "mmRadiusForTransmission", "absoluteScaleMethod", "StandardAbsoluteScale", "numQxQyBins", "1DQbinType",
+        "QbinType", "numQBins", "LogQBinsPerDecade", "useLogQBinsDecadeCenter", "useLogQBinsEvenDecade",
+        "WedgeMinAngles", "WedgeMaxAngles", "autoWedgeQmin", "autoWedgeQmax", "autoWedgeQdelta",
+        "autoWedgeAzimuthalDelta", "autoWedgePeakWidth", "autoWedgeBackgroundWidth", "autoWedgeSignalToNoiseMin",
+        "AnnularAngleBin", "Qmin", "Qmax", "useErrorWeighting", "smearingPixelSizeX",
+        "smearingPixelSizeY", "useSubpixels", "subpixelsX", "subpixelsY", "useSliceIDxAsSuffix",
+        "cutTOFmin", "cutTOFmax", "wavelengthStep", "wavelengthStepType", "normalization",
+        "fluxMonitorRatioFile", "beamFluxFileName", "fitInelasticIncoh", "elasticReference",
+        "elasticReferenceBkgd", "selectMinIncoh"]
+    }
+  },
+  "maxProperties": 10,
+  "required": ["schemaStamp", "instrumentName", "iptsNumber", "dataDirectories", "sample", "background",
+    "emptyTransmission", "beamCenter", "outputFileName", "configuration"]
+}

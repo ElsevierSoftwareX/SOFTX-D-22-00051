@@ -1,0 +1,368 @@
+variables:
+  CONTAINER_URL: "code.ornl.gov:4567/sns-hfir-scse/sans/sans-backend/$CI_COMMIT_REF_SLUG"
+  TEST_SCOPE: "unit"
+
+#####
+# YAML anchors Section
+# to reuse setup and teardown commands
+#####
+.startup_cleanup: &startup_cleanup
+  - curl https://code.ornl.gov/rse-deployment/rse-sharables/raw/master/rse-bash-modules.sh -O
+  - source rse-bash-modules.sh
+  - func_rse_docker_cleanup
+
+.teardown_cleanup: &teardown_cleanup
+  - source rse-bash-modules.sh
+  - func_rse_docker_cleanup
+
+#####
+# Job Stages
+#####
+stages:
+  - flake8
+  - dockerbuild
+  - test
+  - publish
+  - analysis-update
+
+#####
+# Jobs
+#####
+flake8-feature:
+  stage: flake8
+  retry: 1
+  before_script:
+    - sudo cp scripts/fix_runner_perms.sh /etc/cron.hourly/fix_runner_perms.sh
+    - sudo chmod +x /etc/cron.hourly/fix_runner_perms.sh
+  script:
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker run -v $PWD:/opt/sans-backend -t code.ornl.gov:4567/sns-hfir-scse/docker-containers/mantid-framework-nightly/master bash -c "flake8 --append-config /opt/sans-backend/setup.cfg /opt/sans-backend"
+    - sudo chown -R gitlab-runner .
+  tags:
+    - scse-mantid-builder
+  except:
+    - next
+
+flake8-next:
+  stage: flake8
+  retry: 1
+  before_script:
+    - sudo cp scripts/fix_runner_perms.sh /etc/cron.hourly/fix_runner_perms.sh
+    - sudo chmod +x /etc/cron.hourly/fix_runner_perms.sh
+  script:
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker run -v $PWD:/opt/sans-backend -t code.ornl.gov:4567/sns-hfir-scse/docker-containers/mantid-framework-nightly/master bash -c "flake8 --append-config /opt/sans-backend/setup.cfg /opt/sans-backend"
+    - sudo chown -R gitlab-runner .
+  tags:
+    - scse-mantid-builder
+  only:
+    - next
+
+dockerbuild:
+  stage: dockerbuild
+  retry: 1
+  before_script:
+    - *startup_cleanup
+    - sudo cp scripts/fix_runner_perms.sh /etc/cron.hourly/fix_runner_perms.sh
+    - sudo chmod +x /etc/cron.hourly/fix_runner_perms.sh
+  script:
+    - DOCKER_DATE=$(date +%Y.%m.%d)
+    - DOCKER_TAG_BASE=$CONTAINER_URL
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    # kickstart or $CI_COMMIT_REF_SLUG
+    - docker build -f dockerfiles/Dockerfile.kickstart --build-arg PROFILE=${PROFILE} -t $DOCKER_TAG_BASE:$DOCKER_DATE .
+    - docker tag $DOCKER_TAG_BASE:$DOCKER_DATE $DOCKER_TAG_BASE
+    - docker push $DOCKER_TAG_BASE:$DOCKER_DATE
+    - docker push $DOCKER_TAG_BASE
+    # - sed -i "s|CONTAINER_URL|$CONTAINER_URL|" scripts/sans-backend-run.sh
+    - sudo chown -R gitlab-runner .
+  after_script:
+    - *teardown_cleanup
+  tags:
+    - scse-mantid-builder
+  artifacts:
+    paths:
+    - scripts/sans-backend-run.sh
+
+docker-update-test:
+  stage: test
+  retry: 1
+  dependencies:
+    - dockerbuild
+  before_script:
+    - *startup_cleanup
+    - sudo mkdir -p /SNS/EQSANS
+    - sudo mkdir -p /HFIR/CG2
+    - sudo mkdir -p /HFIR/CG3
+    - sudo bash scripts/instruments-mount.sh
+  script:
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time bash -x scripts/sans-backend-run.sh -u || cat SANS_output/*err
+    - sudo chown -R gitlab-runner .
+  after_script:
+    - *teardown_cleanup
+  tags:
+    - scse-mantid-builder    #scse-sans-demo
+
+docker-no-update-test:
+  stage: test
+  retry: 1
+  dependencies:
+    - dockerbuild
+  before_script:
+    - *startup_cleanup
+    - sudo mkdir -p /SNS/EQSANS
+    - sudo mkdir -p /HFIR/CG2
+    - sudo mkdir -p /HFIR/CG3
+    - sudo bash scripts/instruments-mount.sh
+  script:
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time bash -x scripts/sans-backend-run.sh || cat SANS_output/*err
+    - sudo chown -R gitlab-runner .
+  after_script:
+    - *teardown_cleanup
+  tags:
+    - scse-mantid-builder   #scse-sans-demo
+
+docs-feature:
+  stage: test
+  retry: 1
+  dependencies:
+    - dockerbuild
+  script:
+    - *startup_cleanup
+    - set -x
+    - sudo rm -rf /tmp/sans-backend || true
+    - sudo mkdir -p /tmp/sans-backend
+    - sudo cp -r . /tmp/sans-backend
+    - sudo chmod 777 /tmp/sans-backend
+    - pushd /tmp/sans-backend
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time docker run -u 0:0 -v $PWD:/opt/sans-backend -t $CONTAINER_URL bash -c "source activate drtsans-dev&& cp -R /opt/sans-backend /tmp/ && cd /tmp/sans-backend/docs&& make html"
+    - ls .
+    - popd
+  after_script:
+    - ls -l $CI_PROJECT_DIR
+    - *teardown_cleanup
+  tags:
+    - neutrons-multi-builder
+  except:
+    - next
+    - master
+
+docs-next:
+  stage: test
+  retry: 1
+  dependencies:
+    - dockerbuild
+  script:
+    - *startup_cleanup
+    - sudo rm -rf /tmp/sans-backend || true
+    - sudo mkdir -p /tmp/sans-backend
+    - sudo cp -r . /tmp/sans-backend
+    - sudo chmod 777 /tmp/sans-backend
+    - pushd /tmp/sans-backend
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time docker run -u 0:0 -v $PWD:/opt/sans-backend -t $CONTAINER_URL bash -c "source activate drtsans-dev; cd /opt/sans-backend; python /opt/sans-backend/setup.py build_sphinx"
+    - ls .
+    - popd
+  after_script:
+    - cp -r /tmp/sans-backend/build/sphinx/html .
+    - *teardown_cleanup
+  tags:
+    - neutrons-multi-builder
+  only:
+    - next
+  artifacts:
+    paths:
+      -  html
+
+code-unit-test:
+  stage: test
+  retry: 1
+  dependencies:
+    - dockerbuild
+  before_script:
+    - *startup_cleanup
+    - sudo mkdir -p /SNS/EQSANS/shared/sans-backend/ || true
+    - sudo bash scripts/instruments-mount.sh
+  script:
+    - sudo rm -rf /tmp/sans-backend || true
+    - sudo mkdir -p /tmp/sans-backend
+    - sudo cp -r . /tmp/sans-backend
+    - sudo chmod 777 /tmp/sans-backend
+    - pushd /tmp/sans-backend
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time docker run -v /SNS:/SNS -v /HFIR:/HFIR -v $PWD:/opt/sans-backend -t $CONTAINER_URL bash -c "bash /opt/sans-backend/test_job.sh ${TEST_SCOPE}"
+    - popd
+  after_script:
+    - cp -r /tmp/sans-backend/unit_test_results.xml unit_test_results.xml
+    - *teardown_cleanup
+  artifacts:
+    paths:
+      -  unit_test_results.xml
+    reports:
+      junit: unit_test_results.xml
+  tags:
+    - scse-mantid-builder
+
+code-integration-test:
+  stage: test
+  retry: 1
+  dependencies:
+    - dockerbuild
+  before_script:
+    - *startup_cleanup
+    - sudo mkdir -p /SNS/EQSANS/shared/sans-backend/ || true
+    - sudo mkdir -p /HFIR/CG2
+    - sudo mkdir -p /HFIR/CG3
+    - sudo bash scripts/instruments-mount.sh
+  script:
+    - sudo rm -rf /tmp/sans-backend || true
+    - sudo mkdir -p /tmp/sans-backend
+    - sudo cp -r . /tmp/sans-backend
+    - sudo chmod 777 /tmp/sans-backend
+    - pushd /tmp/sans-backend
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time docker run -v /SNS:/SNS -v /HFIR:/HFIR -v $PWD:/opt/sans-backend -t $CONTAINER_URL bash -c "bash /opt/sans-backend/test_job.sh integration"
+    - popd
+  after_script:
+    - cp -r /tmp/sans-backend/integration_test_results.xml integration_test_results.xml
+    - *teardown_cleanup
+  artifacts:
+    paths:
+      -  integration_test_results.xml
+    reports:
+      junit: integration_test_results.xml
+  tags:
+    - scse-mantid-builder
+
+code-pylint:
+  allow_failure: true
+  stage: test
+  dependencies:
+    - dockerbuild
+  script:
+    - *startup_cleanup
+    - sudo rm -rf /tmp/sans-backend || true
+    - sudo mkdir -p /tmp/sans-backend
+    - sudo cp -r . /tmp/sans-backend
+    - sudo chmod 777 /tmp/sans-backend
+    - pushd /tmp/sans-backend
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time docker run -v $PWD:/opt/sans-backend -t $CONTAINER_URL bash -c "bash /opt/sans-backend/scripts/pylint_job.sh"
+    - popd
+  after_script:
+    - *teardown_cleanup
+  tags:
+    - neutrons-multi-builder
+
+create-wheel:
+  stage: test
+  dependencies:
+    - dockerbuild
+  script:
+    - *startup_cleanup
+    - set -x
+    - sudo rm -rf /tmp/sans-backend || true
+    - sudo mkdir -p /tmp/sans-backend
+    - sudo cp -r . /tmp/sans-backend
+    - sudo chmod 777 /tmp/sans-backend
+    - pushd /tmp/sans-backend
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time docker run -v $PWD:/opt/sans-backend -t $CONTAINER_URL bash -c "bash /opt/sans-backend/scripts/create_wheel.sh"
+    - popd
+  after_script:
+    - ls -l $CI_PROJECT_DIR
+    - *teardown_cleanup
+  tags:
+    - neutrons-multi-builder
+
+conda-package:
+  stage: publish
+  dependencies:
+    - create-wheel
+    - dockerbuild
+  script:
+    - *startup_cleanup
+    - sudo rm -rf /tmp/sans-backend || true
+    - sudo mkdir -p /tmp/sans-backend
+    - sudo cp -r . /tmp/sans-backend
+    - sudo chmod 777 /tmp/sans-backend
+    - pushd /tmp/sans-backend
+    - docker login --username=$CI_REGISTRY_USER --password=$CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - time docker pull $CONTAINER_URL
+    - time docker run -v $PWD:/opt/sans-backend -t $CONTAINER_URL bash -c "bash /opt/sans-backend/scripts/publish_package.sh"
+  after_script:
+    - ls -l $CI_PROJECT_DIR
+    - *teardown_cleanup
+  tags:
+    - neutrons-multi-builder
+
+deploy-dev:
+  stage: analysis-update
+  inherit:
+    # do not pass global variables to the downstream pipeline
+    variables: false
+  variables:
+    # specify deployment in the downstream repo is TEST
+    PLAY: update
+    CONDA_ENV: sans-dev
+  trigger:
+    project: sns-hfir-scse/deployments/drtsans-deploy
+    # run the downstream pipeline on branch main
+    branch: main
+  rules:
+    # skip deployment for nightly builds (scheduled builds)
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_REF_SLUG == "next"
+      when: on_success
+
+deploy-qa:
+  stage: analysis-update
+  inherit:
+    # do not pass global variables to the downstream pipeline
+    variables: false
+  variables:
+    # specify deployment in the downstream repo is TEST
+    PLAY: update
+    CONDA_ENV: sans-qa
+  trigger:
+    project: sns-hfir-scse/deployments/drtsans-deploy
+    # run the downstream pipeline on branch main
+    branch: main
+  rules:
+    # skip deployment for nightly builds (scheduled builds)
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_REF_SLUG == "qa"
+      when: on_success
+
+deploy-prod:
+  stage: analysis-update
+  inherit:
+    # do not pass global variables to the downstream pipeline
+    variables: false
+  variables:
+    # specify deployment in the downstream repo is TEST
+    PLAY: update
+    CONDA_ENV: sans
+  trigger:
+    project: sns-hfir-scse/deployments/drtsans-deploy
+    # run the downstream pipeline on branch main
+    branch: main
+  rules:
+    # skip deployment for nightly builds (scheduled builds)
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_REF_SLUG == "main"
+      when: on_success

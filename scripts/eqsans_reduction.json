@@ -1,0 +1,104 @@
+{
+    "schemaStamp": "2021-05-12T19:32:03.250291",
+    "instrumentName": "EQSANS",
+    "iptsNumber": "25961",
+    "sample": {
+        "runNumber": "120077",
+        "thickness": 1,
+        "transmission": {
+            "runNumber": "120073",
+            "value": ""
+        }
+    },
+    "background": {
+        "runNumber": "",
+        "transmission": {
+            "runNumber": "",
+            "value": ""
+        }
+    },
+    "emptyTransmission": {
+        "runNumber": "120066",
+        "value": null
+    },
+    "beamCenter": {
+        "runNumber": "120066"
+    },
+    "outputFileName": "A1_conf1",
+    "configuration": {
+        "outputDir": "/SNS/EQSANS/shared/software/testing/drtsans/next/sans-backend//IPTS-25961/",
+        "useTimeSlice": false,
+        "timeSliceInterval": 300,
+        "useLogSlice": false,
+        "logSliceName": null,
+        "logSliceInterval": 10,
+        "cutTOFmin": 500.0,
+        "cutTOFmax": 2000.0,
+        "wavelengthStep": 0.1,
+        "wavelengthStepType": "constant Delta lambda",
+        "sampleOffset": "314.5",
+        "useDetectorOffset": true,
+        "detectorOffset": "80",
+        "sampleApertureSize": 10,
+        "sourceApertureDiameter": null,
+        "usePixelCalibration": null,
+        "maskFileName": "/SNS/EQSANS/shared/NeXusFiles/EQSANS/2021A_mp/mask_4m_general.nxs",
+        "useDefaultMask": true,
+        "defaultMask": null,
+        "useMaskBackTubes": false,
+        "darkFileName": "/SNS/EQSANS/shared/NeXusFiles/EQSANS/2021A_mp/EQSANS_120577.nxs.h5",
+        "normalization": "Total charge",
+        "fluxMonitorRatioFile": null,
+        "beamFluxFileName": "/SNS/EQSANS/shared/instrument_configuration/bl6_flux_at_sample",
+        "sensitivityFileName": "/SNS/EQSANS/shared/NeXusFiles/EQSANS/2021A_mp/Sensitivity_patched_thinPMMA_4m_120578.nxs",
+        "useSolidAngleCorrection": true,
+        "useThetaDepTransCorrection": true,
+        "mmRadiusForTransmission": 25,
+        "absoluteScaleMethod": "standard",
+        "StandardAbsoluteScale": 4.9261419618,
+        "numQxQyBins": 80,
+        "1DQbinType": "scalar",
+        "QbinType": "log",
+        "numQBins": 60,
+        "LogQBinsPerDecade": null,
+        "useLogQBinsDecadeCenter": false,
+        "useLogQBinsEvenDecade": false,
+        "WedgeMinAngles": "-30, 60",
+        "WedgeMaxAngles": "30, 120",
+        "autoWedgeQmin": null,
+        "autoWedgeQmax": null,
+        "autoWedgeQdelta": null,
+        "autoWedgeAzimuthalDelta": null,
+        "autoWedgePeakWidth": null,
+        "autoWedgeBackgroundWidth": null,
+        "autoWedgeSignalToNoiseMin": null,
+        "AnnularAngleBin": 5.0,
+        "Qmin": null,
+        "Qmax": null,
+        "useErrorWeighting": null,
+        "smearingPixelSizeX": null,
+        "smearingPixelSizeY": null,
+        "useSubpixels": null,
+        "subpixelsX": null,
+        "subpixelsY": null,
+        "useSliceIDxAsSuffix": null,
+        "fitInelasticIncoh": false,
+        "elasticReference": {
+            "runNumber": null,
+            "thickness": "1.0",
+            "transmission": {
+                "runNumber": null,
+                "value": "0.9"
+            }
+        },
+        "elasticReferenceBkgd": {
+            "runNumber": null,
+            "transmission": {
+                "runNumber": null,
+                "value": "0.9"
+            }
+        },
+        "selectMinIncoh": true
+    },
+    "dataDirectories": "/SNS/EQSANS/shared/software/testing/drtsans/next/sans-backend//IPTS-25961/"
+}

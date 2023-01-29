@@ -1,0 +1,18 @@
+# INSTALL THE requirements.txt AS WELL
+
+pytest >= 3.2
+pytest-xdist
+jinja2
+sphinx
+sphinxcontrib-napoleon
+
+# for linting and formatting
+autopep8
+flake8
+pylint
+black
+pre-commit
+
+build
+check-wheel-contents
+pytest-runner

@@ -1,0 +1,70 @@
+# Field mapping between
+# new_field_in_event_nexus
+#   - old_field_in_xml/spice
+#   - unit_optional
+beamtrap_diameter:
+  - beamtrap_diameter
+  - mm
+CG3:CS:SampleToSi:
+  - sample_to_flange
+  - mm
+cycle_number:
+  - Cycle_Number
+  - ""
+dcal_Readback:
+  - dcal
+  - mm
+detector_trans_Readback:
+  - detector_trans
+  - mm
+experiment_identifier:
+  - IPTS_number
+  - ""
+  - str
+flange_det_dist_Readback:
+  - flange_det_dist
+  - m
+run_title:
+  - Scan_Title
+  - ''
+  - str
+sample_aperture_diameter:
+  - sample_aperture_size
+  - mm
+sample_changer_name:
+  - Sample_Changer
+  - ""
+  - str
+sample_changer_pos:
+  - Sample_Changer_Position
+  - ""
+sample_detector_distance:
+  - sdd
+  - m
+sample_temp:
+  - chiller
+  - "C"
+sample_thickness:
+  - Sample_Thickness
+  - cm
+source_aperture_diameter:
+  - source_aperture_size
+  - mm
+source_distance:  
+# same AS source-aperture-sample-aperture
+  - source_distance
+  - m
+wavelength:
+# same for LambdaReq
+  - lambda  # same as wavelength in the header section
+  - angstroms  # angstroms -> A
+wavelength_spread:
+# same for DLambdaReq
+  - dlambda  # same as wavelength_spread in the header section
+  - fraction  # fraction -> None
+ww_dcal:
+  - wwdcal
+  - mm
+ww_rot_Readback:
+  - det_west_wing_rot
+  - degrees

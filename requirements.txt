@@ -1,0 +1,12 @@
+h5py
+numpy
+docutils
+jsonschema>=3.0.2
+lmfit
+matplotlib  # is this necessary
+mpld3
+numexpr
+pandas
+sortedcontainers
+tinydb
+ipywidgets

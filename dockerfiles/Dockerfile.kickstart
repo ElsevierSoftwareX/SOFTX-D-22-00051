@@ -1,0 +1,24 @@
+FROM code.ornl.gov:4567/rse/images/miniconda3:4.10.3
+
+# This environment name matches the one in drtsans-dev.yml
+ARG CONDA_ENV=drtsans-dev
+
+COPY drtsans-dev.yml /tmp/drtsans-dev.yml
+
+# update packages
+RUN apt-get update \
+    && apt-get upgrade -y \
+    # libgl1 is needed by mantidworkbench
+    && apt-get install -y libgl1 make \
+    # for mounting SNS data file (equivalent to previous yum install nfs-utils)
+    && apt-get install -y nfs-common nfs-kernel-server \
+    && apt-get autoremove -y \
+    && apt-get clean -y
+
+# create env and install mantid (formally mantid-framework)
+# -- install mamba first
+RUN conda install -c conda-forge mamba
+# -- use mamba for faster install
+RUN mamba env create -n $CONDA_ENV -f /tmp/drtsans-dev.yml python==3.8
+RUN conda init -q --all
+RUN echo "conda activate $CONDA_ENV" >> ~/.bashrc

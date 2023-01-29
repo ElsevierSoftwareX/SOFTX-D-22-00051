@@ -1,0 +1,238 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "type": "object",
+  "properties": {
+    "schemaStamp": {"$ref": "common.json#/schemaStamp"},
+    "instrumentName": {
+      "$ref": "common.json#/instrumentName",
+      "default": "BIOSANS"
+    },
+    "iptsNumber":            {"$ref":  "common.json#/iptsNumber"},
+    "dataDirectories":  {"$ref":  "common.json#/dataDirectories"},
+    "sample":{
+      "type": "object",
+      "properties" : {
+        "runNumber": {"$ref": "common.json#/sample/properties/runNumber"},
+        "thickness": {"$ref": "common.json#/sample/properties/thickness", "default": 1.0},
+        "transmission": {"$ref":  "common.json#/sample/properties/transmission"}
+      },
+      "maxProperties": 3,
+      "required": ["runNumber", "thickness", "transmission"]
+    },
+    "background":        {"$ref":  "common.json#/background"},
+    "emptyTransmission": {"$ref":  "common.json#/emptyTransmission"},
+    "beamCenter":        {"$ref":  "common.json#/beamCenter"},
+    "outputFileName":    {"$ref":  "common.json#/outputFileName"},
+
+    "configuration": {
+      "type": "object",
+      "properties": {
+
+        "outputDir": {"$ref":  "common.json#/configuration/outputDir"},
+
+        "wavelength":       {"$ref":  "common.json#/configuration/wavelength"},
+        "wavelengthSpread": {"$ref":  "common.json#/configuration/wavelengthSpread"},
+
+        "useTimeSlice":         {"$ref":  "common.json#/configuration/useTimeSlice", "default": false},
+        "useTimeSliceTransmission": {"$ref":  "common.json#/configuration/useTimeSlice", "default": false},
+        "timeSliceInterval": {"$ref":  "common.json#/configuration/timeSliceInterval"},
+
+        "useLogSlice":         {"$ref":  "common.json#/configuration/useLogSlice", "default": false},
+        "logSliceName":     {"$ref":  "common.json#/configuration/logSliceName"},
+        "logSliceInterval": {"$ref":  "common.json#/configuration/logSliceInterval"},
+
+        "sampleOffset":     {"$ref":  "common.json#/configuration/sampleOffset"},
+        "sampleApertureSize":     {"$ref":  "common.json#/configuration/sampleApertureSize"},
+        "sampleDetectorDistance": {"$ref":  "common.json#/configuration/sampleDetectorDistance"},
+        "sampleToSi":             {"$ref":  "common.json#/definitions/safeStringPositiveFloat"},
+        "sourceApertureDiameter": {
+          "$ref":  "common.json#/configuration/sourceApertureDiameter",
+          "description": "Source aperture diameter (mm)"
+        },
+
+        "usePixelCalibration": {"$ref":  "common.json#/configuration/usePixelCalibration", "default": false},
+
+        "maskFileName":     {"$ref":  "common.json#/configuration/maskFileName"},
+        "useDefaultMask":   {"$ref":  "common.json#/configuration/useDefaultMask", "default": true,
+                             "useEntry": "#configuration/defaultMask"},
+        "defaultMask": {"$ref":  "common.json#/configuration/defaultMask",
+                        "default": [{"Pixel": "1-18,239-256"}, {"Bank": "18-24,42-48"}]},
+        "useMaskBackTubes": {"$ref":  "common.json#/configuration/useMaskBackTubes", "default": false},
+        "darkMainFileName":    {"$ref":  "common.json#/configuration/darkFileName"},
+        "darkWingFileName":    {"$ref":  "common.json#/configuration/darkFileName"},
+        "normalization": {"$ref":  "common.json#/configuration/normalization", "default": "Monitor"},
+        "normalizationResortToTime":  {"$ref":  "common.json#/configuration/normalizationResortToTime", "default": false},
+        "sensitivityMainFileName":    {"$ref": "common.json#/configuration/sensitivityFileName"},
+        "sensitivityWingFileName":    {"$ref": "common.json#/configuration/sensitivityFileName"},
+        "useSolidAngleCorrection":    {"$ref": "common.json#/configuration/useSolidAngleCorrection", "default": true},
+        "blockedBeamRunNumber":        {"$ref": "common.json#/configuration/blockedBeamRunNumber"},
+        "useThetaDepTransCorrection": {"$ref": "common.json#/configuration/useThetaDepTransCorrection", "default": true},
+        "DBScalingBeamRadius":    {"$ref":  "common.json#/configuration/DBScalingBeamRadius", "default": 40.0},
+        "mmRadiusForTransmission":    {"$ref": "common.json#/configuration/mmRadiusForTransmission"},
+        "absoluteScaleMethod":        {"$ref": "common.json#/configuration/absoluteScaleMethod", "default": "standard"},
+        "StandardAbsoluteScale":        {"$ref": "common.json#/configuration/StandardAbsoluteScale", "default": 2.17e-10},
+
+        "numMainQxQyBins":      {"$ref":  "common.json#/configuration/numQxQyBins"},
+        "numWingQxQyBins":      {"$ref":  "common.json#/configuration/numQxQyBins"},
+        "1DQbinType":           {"$ref":  "common.json#/configuration/1DQbinType", "default": "wedge"},
+        "QbinType":             {"$ref":  "common.json#/configuration/QbinType"},
+        "numMainQBins": {
+          "$ref":  "common.json#/configuration/numQBins",
+          "evaluateCondition": "('{#configuration/QbinType}' == 'linear' and {this} is not None) or ('{#configuration/QbinType}' == 'log' and (({this} is None) ^ ({#configuration/LogQBinsPerDecadeMain} is None)))"
+        },
+        "numWingQBins": {
+          "$ref":  "common.json#/configuration/numQBins",
+          "evaluateCondition": "('{#configuration/QbinType}' == 'linear' and {this} is not None) or ('{#configuration/QbinType}' == 'log' and (({this} is None) ^ ({#configuration/LogQBinsPerDecadeWing} is None)))"
+        },
+        "LogQBinsPerDecadeMain": {"$ref":  "common.json#/configuration/LogQBinsPerDecade"},
+        "LogQBinsPerDecadeWing": {"$ref":  "common.json#/configuration/LogQBinsPerDecade"},
+        "useLogQBinsDecadeCenter": {"$ref":  "common.json#/configuration/useLogQBinsDecadeCenter", "default": false},
+        "useLogQBinsEvenDecade":   {"$ref":  "common.json#/configuration/useLogQBinsEvenDecade", "default": false},
+
+        "WedgeMinAngles":            {"$ref":  "common.json#/configuration/WedgeMinAngles", "default": [-45, 165]},
+        "WedgeMaxAngles":            {"$ref":  "common.json#/configuration/WedgeMaxAngles", "default": [45, 190]},
+        "autoWedgeQmin":             {"$ref":  "common.json#/configuration/autoWedgeQmin", "default":  0.003},
+        "autoWedgeQmax":             {"$ref":  "common.json#/configuration/autoWedgeQmax", "default":  0.04},
+        "autoWedgeQdelta":           {"$ref":  "common.json#/configuration/autoWedgeQdelta", "default":  0.01},
+        "autoWedgeAzimuthalDelta":  {"$ref":  "common.json#/configuration/autoWedgeAzimuthalDelta", "default": 1.0},
+        "autoWedgePeakWidth":        {"$ref":  "common.json#/configuration/autoWedgePeakWidth", "default":  0.25},
+        "autoWedgeBackgroundWidth":  {"$ref":  "common.json#/configuration/autoWedgeBackgroundWidth", "default": 1.5},
+        "autoWedgeSignalToNoiseMin": {"$ref":  "common.json#/configuration/autoWedgeSignalToNoiseMin", "default": 2.0},
+        "AnnularAngleBin":           {"$ref":  "common.json#/configuration/AnnularAngleBin", "default": 1},
+
+        "useErrorWeighting":  {"$ref":  "common.json#/configuration/useErrorWeighting", "default": false},
+        "smearingPixelSizeX": {"$ref":  "common.json#/configuration/smearingPixelSizeX"},
+        "smearingPixelSizeY": {"$ref":  "common.json#/configuration/smearingPixelSizeY"},
+        "useSubpixels":       {"$ref":  "common.json#/configuration/useSubpixels", "default": false},
+        "subpixelsX":         {"$ref":  "common.json#/configuration/subpixelsX"},
+        "subpixelsY":         {"$ref":  "common.json#/configuration/subpixelsY"},
+        "QminMain": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.02,
+          "pairedTo": "#configuration/QmaxMain",
+          "lessThan": "#configuration/QmaxMain",
+          "description": "The minimum |Q| value for scalar, wedge, or annular binning in the main detector"
+        },
+        "QmaxMain": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.125,
+          "pairedTo": "#configuration/QminMain",
+          "description": "The maximum |Q| value for scalar, wedge, or annular binning in the wing detector"
+        },
+        "QminWing": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.06,
+          "pairedTo": "#configuration/QmaxWing",
+          "lessThan": "#configuration/QmaxWing",
+          "description": "The minimum |Q| value for scalar, wedge, or annular binning in the wing detector"
+        },
+        "QmaxWing": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 1.0,
+          "pairedTo": "#configuration/QminWing",
+          "description": "The maximum |Q| value for scalar, wedge, or annular binning in the main detector"
+        },
+        "overlapStitchQmin": {
+          "$ref":  "common.json#/definitions/safeStitchQbounsSpecs",
+          "evaluateCondition": "{this} is None or len({this})==1 or len({this})==len({#configuration/WedgeMinAngles})",
+          "description": "The minimum |Q| value in the region where intensities for main and wing detector overlap"
+        },
+        "overlapStitchQmax": {
+          "$ref":  "common.json#/definitions/safeStitchQbounsSpecs",
+          "evaluateCondition": "{this} is None or len({this})==1 or len({this})==len({#configuration/WedgeMaxAngles})",
+          "description": "The maximum |Q| value in the region where intensities for main and wing detector overlap"
+        },
+
+        "wedge1QminMain": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.02,
+          "lessThan": "#configuration/wedge1QmaxMain"
+        },
+        "wedge1QmaxMain": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.09,
+          "pairedTo": "#configuration/wedge1QminMain"
+        },
+
+        "wedge1QminWing": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.08,
+          "lessThan": "#configuration/wedge1QmaxWing"
+        },
+        "wedge1QmaxWing": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.09,
+          "pairedTo": "#configuration/wedge1QminWing"
+        },
+
+        "wedge1overlapStitchQmin": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.0825,
+          "lessThan": "#configuration/wedge1overlapStitchQmax"
+        },
+        "wedge1overlapStitchQmax": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.0875,
+          "pairedTo": "#configuration/wedge1overlapStitchQmin"
+        },
+
+        "wedge2QminMain": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.02,
+          "lessThan": "#configuration/wedge2QmaxMain"
+        },
+        "wedge2QmaxMain": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.125,
+          "pairedTo": "#configuration/wedge2QminMain"
+        },
+
+        "wedge2QminWing": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.06,
+          "lessThan": "#configuration/wedge2QmaxWing"
+        },
+        "wedge2QmaxWing": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 1.0,
+          "pairedTo": "#configuration/wedge2QminWing"
+        },
+
+        "wedge2overlapStitchQmin": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.075,
+          "lessThan": "#configuration/wedge2overlapStitchQmax"
+        },
+        "wedge2overlapStitchQmax": {
+          "$ref":  "common.json#/definitions/safeStringPositiveFloat",
+          "default": 0.095,
+          "pairedTo": "#configuration/wedge2overlapStitchQmin"
+        }
+      },
+
+      "maxProperties": 76,
+      "required": ["outputDir", "wavelength", "wavelengthSpread", "useTimeSlice", "useTimeSliceTransmission",
+        "timeSliceInterval", "useLogSlice", "logSliceName", "logSliceInterval", "sampleOffset",
+        "sampleApertureSize", "sampleDetectorDistance", "sourceApertureDiameter",
+        "usePixelCalibration", "maskFileName", "useDefaultMask",
+        "defaultMask", "useMaskBackTubes", "darkMainFileName", "darkWingFileName", "normalization",
+        "normalizationResortToTime",
+        "sensitivityMainFileName", "sensitivityWingFileName", "useSolidAngleCorrection", "blockedBeamRunNumber",
+        "useThetaDepTransCorrection", "DBScalingBeamRadius", "mmRadiusForTransmission", "absoluteScaleMethod",
+        "StandardAbsoluteScale", "numMainQxQyBins", "numWingQxQyBins", "1DQbinType", "QbinType", "numMainQBins",
+        "numWingQBins", "LogQBinsPerDecadeMain", "LogQBinsPerDecadeWing","useLogQBinsDecadeCenter",
+        "useLogQBinsEvenDecade", "WedgeMinAngles", "WedgeMaxAngles", "autoWedgeQmin",
+        "autoWedgeQmax", "autoWedgeQdelta", "autoWedgeAzimuthalDelta", "autoWedgePeakWidth",
+        "autoWedgeBackgroundWidth", "autoWedgeSignalToNoiseMin", "AnnularAngleBin", "useErrorWeighting",
+        "smearingPixelSizeX", "smearingPixelSizeY", "useSubpixels", "subpixelsX",
+        "subpixelsY", "sampleToSi", "QminMain", "QmaxMain", "QminWing", "QmaxWing", "overlapStitchQmin",
+        "overlapStitchQmax", "wedge1QminMain", "wedge1QmaxMain", "wedge1QminWing", "wedge1QmaxWing",
+        "wedge1overlapStitchQmin", "wedge1overlapStitchQmax", "wedge2QminMain", "wedge2QmaxMain",
+        "wedge2QminWing", "wedge2QmaxWing", "wedge2overlapStitchQmin", "wedge2overlapStitchQmax"]
+    }
+  },
+  "maxProperties": 10,
+  "required": ["schemaStamp", "instrumentName", "iptsNumber", "dataDirectories", "sample", "background",
+    "emptyTransmission", "beamCenter", "outputFileName", "configuration"]
+}

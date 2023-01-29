@@ -1,0 +1,543 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+
+    "instrumentName": {
+      "type": "string",
+      "description": "The name of the instrument. It is used to select reduction script",
+      "enum": [
+        "BIOSANS",
+        "EQSANS",
+        "GPSANS"
+      ],
+      "examples": [
+        "EQSANS"
+      ]
+    },
+
+    "iptsNumber": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[1-9][0-9]*$"
+        },
+        {
+          "type": "integer",
+          "minimum": 1
+        }
+      ],
+      "description": "The IPTS number for the data files. The path to datafiles will be /SNS/EQSANS/IPTS-{iptsNumber}/nexus",
+      "examples": [
+        "24769"
+      ]
+    },
+
+    "runNumber": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[1-9][0-9]*$"
+        },
+        {
+          "type": "integer",
+          "minimum": 1
+        }
+      ],
+      "description": "The run number for the sample. The sample filename will be EQSANS_{runNumber}.nxs.h5"
+    },
+
+    "thickness": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true
+        }
+      ],
+      "description": "The sample thickness in cm",
+      "default": "1"
+    },
+
+    "outputFileName": {
+      "type": "string",
+      "description": "The pattern for output filenames, such as {outputFileName}.png or {outputFileName}.dat. If empty, the pattern is EQSANS_{runNumber}"
+    },
+
+    "transmission": {
+      "type": "object",
+      "properties": {
+        "runNumber": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^$|^[1-9][0-9]*$"
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^$|^0?.[0-9]*$"
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": true,
+              "maximum": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "runNumber",
+        "value"
+      ],
+      "maxProperties": 2,
+      "description": "The transmission for the sample, run number or value (0 < value <=1). Can be empty"
+    },
+
+    "background": {
+      "type": "object",
+      "properties": {
+        "runNumber": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^$|^[1-9][0-9]*$"
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ],
+          "description": "background run number"
+        },
+        "transmission": {
+          "type": "object",
+          "properties": {
+            "runNumber": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^$|^[1-9][0-9]*$"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "value": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^$|^0?.[0-9]*$"
+                },
+                {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": true,
+                  "maximum": 1
+                }
+              ]
+            }
+          },
+          "required": [
+            "runNumber",
+            "value"
+          ],
+          "description": "The transmission for the background, run number or value (0 < value <=1). Can be empty"
+        }
+      },
+      "required": [
+        "runNumber",
+        "transmission"
+      ]
+    },
+
+    "beamCenter": {
+      "type": "object",
+      "properties": {
+        "runNumber": {
+          "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[1-9][0-9]*$"
+        },
+        {
+          "type": "integer",
+          "minimum": 1
+        }
+      ]
+        }
+      },
+      "required": [
+        "runNumber"
+      ],
+      "description": "The run number for calculating the beam center (required)"
+    },
+
+    "empty": {
+      "type": "object",
+      "properties": {
+        "runNumber": {
+          "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^$|^[1-9][0-9]*$"
+        },
+        {
+          "type": "integer",
+          "minimum": 1
+        }
+      ]
+        }
+      },
+      "required": [
+        "runNumber"
+      ],
+      "description": "Empty beam run number, used for transmission calculation"
+    },
+
+
+    "configuration": {
+      "type": "object",
+      "properties": {
+        "outputDir": {
+          "type": "string",
+          "description": "Output folder"
+        },
+        "sampleApertureSize": {
+          "type": ["string", "number"],
+          "descrition": "Sample aperture diameter (mm)"
+        },
+        "sourceApertureDiameter": {
+          "type": ["string", "number"],
+          "descrition": "Source aperture diameter (mm)"
+        },
+        "useMaskFileName": {
+          "type": "boolean",
+          "description": "Flag to use the mask from maskFileName"
+        },
+        "maskFileName": {
+          "type": "string",
+          "description": "Path to a saved file containing mask"
+        },
+        "useDefaultMask": {
+          "type": "boolean",
+          "description": "flag to use a mask that is run number dependent (stored in a database)"
+        },
+        "normalization": {
+          "type": "string",
+          "enum": [
+            "Monitor",
+            "Total charge",
+            "Time",
+            ""
+            ],
+          "description": "Normalization type. Allowed values 'Total charge', 'Time', 'Monitor', ''"
+        },
+        "fluxMonitorRatioFile": {
+          "type": "string",
+          "description": "Path to the monitor flux ratio file (used in normalization by monitor)"
+        },
+        "beamFluxFileName": {
+          "type": "string",
+          "description": "Path to the flux file (used in normalization by proton charge)"
+        },
+        "useDarkFileName": {
+          "type": "boolean",
+          "description": "Flag whether to use the dark file background"
+        },
+        "darkFileName": {
+          "type": "string",
+          "description": "Path to the dark measurement file"
+        },
+        "useSensitivityFileName": {
+          "type": "boolean",
+          "description": "Flag whether to apply sensitivity measurement"
+        },
+        "sensitivityFileName": {
+          "type": "string",
+          "description": "Path to sensitivity measurement file"
+        },
+        "absoluteScaleMethod": {
+          "type": "string",
+          "enum": ["standard"],
+          "description": "Absolute scaling method. Only 'standard' (multiply by a constant) is implemented for EQSANS"
+        },
+        "StandardAbsoluteScale": {
+          "type": ["string", "number"],
+          "minimum": 0,
+          "description": "Multiplicative scaling factor to transform intensity to absolute scale"
+        },
+        "useSampleOffset": {
+          "type": "boolean",
+          "description": "Flag whether to use the sample offset"
+        },
+        "sampleOffset": {
+          "type": ["string", "number"],
+          "description": "Sample offset in mm"
+        },
+        "useDetectorOffset": {
+          "type": "boolean",
+          "description": "Flag whether to use the detector offset"
+        },
+        "detectorOffset": {
+          "type": ["string", "number"],
+          "description": "Detector offset in mm"
+        },
+        "useSolidAngleCorrection": {
+          "type": "boolean",
+          "description": "Flag whether to apply solid angle correction"
+        },
+        "useThetaDepTransCorrection": {
+          "type": "boolean",
+          "description": "Flag whether to calculate a theta dependent transmission"
+        },
+        "mmRadiusForTransmission": {
+          "type": ["string", "number"],
+          "description": "Integration radius (in mm) to be used for transmission calculation"
+        },
+        "numQxQyBins": {
+          "type": ["string","integer"],
+          "minLength": 1,
+          "pattern": "^[1-9][0-9]*$",
+          "minimum": 1,
+          "description": "Number of bins in the x and y direction for 2D binning"
+        },
+        "1DQbinType": {
+          "type": "string",
+          "enum": ["scalar", "annular", "wedge"],
+          "description": "Options for 1D binning: |Q|, azimuthal angle, or |Q| for a particular wedge"
+        },
+        "QbinType": {
+          "type": "string",
+          "enum": ["linear", "log"],
+          "description": "1D binning type for scalar or wedge modes ('linear' or 'log')"
+        },
+        "numQBins": {
+          "type": ["string","integer"],
+          "pattern": "^$|^[1-9][0-9]*$",
+          "minimum": 1,
+          "description": "Number of 1D bins for scalar and wedge modes. If log binning is selected, then exactly one of numQBins and LogQBinsPerDecade must be specified"
+        },
+        "LogQBinsPerDecade": {
+          "type": ["string","integer"],
+          "pattern": "^$|^[1-9][0-9]*$",
+          "minimum": 1,
+          "description": "Number of 1D bins for scalar and wedge modes in every dacade (in logarithmic mode only). If log binning is selected, then exactly one of numQBins and LogQBinsPerDecade must be specified"
+        },
+        "LogQBinsDecadeCenter": {
+          "type": "boolean",
+          "description": "Flag to specify  that the min max |Q| is on a bin center; Otherwise, they will be on bin boundary"
+        },
+        "LogQBinsEvenDecade": {
+          "type": "boolean",
+          "description": "If true, the logarithmic binning is extended such that it starts and ends on some power of 10"
+        },
+        "WedgeMinAngles": {
+          "type": ["string", "array"],
+          "items":{
+            "type": "number",
+            "minimum":-90,
+            "maximum":270,
+            "exclusiveMaximum": true
+          },
+          "description": "Minimum angles for the wedges, from -90 to 270"
+        },
+        "WedgeMaxAngles": {
+          "type": ["string", "array"],
+          "items":{
+            "type": "number",
+            "minimum":-90,
+            "maximum":270,
+            "exclusiveMaximum": true
+          },
+          "description": "Maximum angles for the wedges, from -90 to 270"
+        },
+        "autoWedgeQmin": {
+          "type": ["string","number"],
+          "description": "Minimum Q for automatic wedge fitting"
+        },
+        "autoWedgeQmax":  {
+          "type": ["string","number"],
+          "description": "Maximum Q for automatic wedge fitting"
+        },
+        "autoWedgeQdelta":  {
+          "type": ["string","number"],
+          "description": "Q step for automatic wedge fitting"
+        },
+        "autoWedgeAzimuthal_delta":  {
+          "type": ["string","number"],
+          "description": "Azimuthal angle step for automatic wedge fitting"
+        },
+        "autoWedgePeakWidth":  {
+          "type": ["string","number"],
+          "description": "Percent of full-width-half-max (FWHM) of the peak in automatic wedge fitting."
+        },
+        "autoWedgeBackgroundWidth":  {
+          "type": ["string","number"],
+          "description": "Percent of full-width-half-max (FWHM) of the background in automatic wedge fitting."
+        },
+        "autoWedgeSignalToNoiseMin":  {
+          "type": ["string","number"],
+          "description": "Minimum signal to noise ratio for the data to be considered fittable in automatic wedge detection"
+        },
+        "AnnularAngleBin": {
+          "type": ["string","number"],
+          "description": "Angle bin size in degrees for annular binning"
+        },
+        "Qmin": {
+          "type": ["string","number"],
+          "description": "The minimum |Q| value for scalar, wedge, or annular binning"
+        },
+        "Qmax": {
+          "type": ["string","number"],
+          "description": "The maximum |Q| value for scalar, wedge, or annular binning"
+        },
+        "useErrorWeighting": {
+          "type": "boolean",
+          "description": "Flag whether to use error weighting of intensities"
+        },
+        "useTOFcuts": {
+          "type": "boolean",
+          "description": "Flag to use user defined time of flight range"
+        },
+        "TOFmin": {
+          "type": ["string","number"],
+          "description": "User defined time of flight range minimum"
+        },
+        "TOFmax": {
+          "type": ["string","number"],
+          "description": "User defined time of flight range maximum"
+        },
+        "useMaskBackTubes": {
+          "type": "boolean",
+          "description": "Flag whether to mask the tubes in the back"
+        },
+        "wavelengthStepType": {
+          "type": "string",
+          "description": "Flag for constant lambda or constant Delta lambda/lambda"
+        },
+        "wavelengthStep": {
+          "type": ["string","number"],
+          "description": "Wavelength step. The loaded data files are transformed into wavelength in angstroms, then binned with this step"
+        },
+        "pixel_size_x": {
+          "type": ["string","number"],
+          "description": "Override pixel x size"
+        },
+        "pixel_size_y": {
+          "type":["string","number"],
+          "description": "Override pixel y size"
+        },
+        "timeslice": {
+          "type": "boolean",
+          "description": "Indicate whether the data should be processed as time slices (incompatible with sample log slicing)"
+        },
+        "timesliceinterval": {
+          "type": ["string","number"],
+          "description": "Interval for time slicing"
+        },
+        "logslice": {
+          "type": "boolean",
+          "description": "Indicate whether the data should be processed as sample log slices (incompatible with time slicing)"
+        },
+        "logslicename": {
+          "type": "string",
+          "description": "Sample log name for slicing"
+        },
+        "logsliceinterval": {
+          "type": ["string","number"],
+          "description": "Sample log interval for slicing"
+        }
+      },
+      "required": [
+        "outputDir",
+        "sampleApertureSize",
+        "sourceApertureDiameter",
+        "useMaskFileName",
+        "maskFileName",
+        "useDefaultMask",
+        "normalization",
+        "fluxMonitorRatioFile",
+        "beamFluxFileName",
+        "useDarkFileName",
+        "darkFileName",
+        "useSensitivityFileName",
+        "sensitivityFileName",
+        "absoluteScaleMethod",
+        "StandardAbsoluteScale",
+        "useSampleOffset",
+        "sampleOffset",
+        "useDetectorOffset",
+        "detectorOffset",
+        "useSolidAngleCorrection",
+        "useThetaDepTransCorrection",
+        "mmRadiusForTransmission",
+        "numQxQyBins",
+        "1DQbinType",
+        "QbinType",
+        "numQBins",
+        "LogQBinsPerDecade",
+        "LogQBinsDecadeCenter",
+        "LogQBinsEvenDecade",
+        "WedgeMinAngles",
+        "WedgeMaxAngles",
+        "AnnularAngleBin",
+        "autoWedgeQmin",
+        "autoWedgeQmax",
+        "autoWedgeQdelta",
+        "autoWedgeAzimuthal_delta",
+        "autoWedgePeakWidth",
+        "autoWedgeBackgroundWidth",
+        "autoWedgeSignalToNoiseMin",
+        "Qmin",
+        "Qmax",
+        "useErrorWeighting",
+        "useTOFcuts",
+        "TOFmin",
+        "TOFmax",
+        "useMaskBackTubes",
+        "wavelengthStepType",
+        "wavelengthStep",
+        "pixel_size_x",
+        "pixel_size_y",
+        "timeslice",
+        "timesliceinterval",
+        "logslice",
+        "logslicename",
+        "logsliceinterval"
+      ],
+      "maxProperties":55
+    }
+  },
+  "required": [
+    "instrumentName",
+    "iptsNumber",
+    "runNumber",
+    "thickness",
+    "outputFileName",
+    "transmission",
+    "background",
+    "beamCenter",
+    "empty",
+    "configuration"
+  ],
+  "maxProperties": 10
+}
+

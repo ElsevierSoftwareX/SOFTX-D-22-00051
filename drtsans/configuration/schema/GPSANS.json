@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+
+  "type": "object",
+  "properties": {
+    "schemaStamp": {"$ref": "common.json#/schemaStamp"},
+
+    "instrumentName": {
+      "$ref": "common.json#/instrumentName",
+      "default": "GPSANS"
+    },
+
+    "iptsNumber":        {"$ref":  "common.json#/iptsNumber"},
+    "dataDirectories":   {"$ref":  "common.json#/dataDirectories"},
+    "sample":            {"$ref":  "common.json#/sample"},
+    "background":        {"$ref":  "common.json#/background"},
+    "emptyTransmission": {"$ref":  "common.json#/emptyTransmission"},
+    "beamCenter":        {"$ref":  "common.json#/beamCenter"},
+    "outputFileName":    {"$ref":  "common.json#/outputFileName"},
+
+    "configuration": {
+      "type": "object",
+      "properties": {
+
+        "outputDir": {"$ref":  "common.json#/configuration/outputDir"},
+
+        "wavelength":       {"$ref":  "common.json#/configuration/wavelength"},
+        "wavelengthSpread": {"$ref":  "common.json#/configuration/wavelengthSpread"},
+
+        "useTimeSlice":         {"$ref":  "common.json#/configuration/useTimeSlice", "default": false},
+        "timeSliceInterval": {"$ref":  "common.json#/configuration/timeSliceInterval"},
+
+        "useLogSlice":         {"$ref":  "common.json#/configuration/useLogSlice", "default": false},
+        "logSliceName":     {"$ref":  "common.json#/configuration/logSliceName"},
+        "logSliceInterval": {"$ref":  "common.json#/configuration/logSliceInterval"},
+
+        "sampleOffset":           {"$ref":  "common.json#/configuration/sampleOffset"},
+        "useDetectorOffset":      {"$ref":  "common.json#/configuration/useDetectorOffset", "default": true,
+                                   "useEntry": "#configuration/detectorOffset"},
+        "detectorOffset":         {"$ref":  "common.json#/configuration/detectorOffset", "default": 0.0},
+        "sampleDetectorDistance": {"$ref":  "common.json#/configuration/sampleDetectorDistance"},
+        "sampleToSi":             {"$ref":  "common.json#/configuration/sampleToSi"},
+        "sampleApertureSize":     {"$ref":  "common.json#/configuration/sampleApertureSize"},
+        "sourceApertureDiameter": {
+          "$ref":  "common.json#/configuration/sourceApertureDiameter",
+          "description": "Source aperture diameter (mm)"
+        },
+        "usePixelCalibration": {"$ref":  "common.json#/configuration/usePixelCalibration", "default": false},
+
+        "maskFileName":     {"$ref":  "common.json#/configuration/maskFileName"},
+        "useDefaultMask":   {"$ref":  "common.json#/configuration/useDefaultMask", "default": true,
+                             "useEntry": "#configuration/defaultMask"},
+        "defaultMask":      {"$ref":  "common.json#/configuration/defaultMask",
+                             "default":  [{"Pixel": "1-10,247-256"}]},
+        "useMaskBackTubes": {"$ref":  "common.json#/configuration/useMaskBackTubes", "default": false},
+
+        "darkFileName":    {"$ref":  "common.json#/configuration/darkFileName"},
+        "normalization":              {"$ref":  "common.json#/configuration/normalization", "default": "Monitor"},
+        "normalizationResortToTime":  {"$ref":  "common.json#/configuration/normalizationResortToTime", "default": false},
+        "sensitivityFileName":        {"$ref":  "common.json#/configuration/sensitivityFileName"},
+        "useSolidAngleCorrection":    {"$ref":  "common.json#/configuration/useSolidAngleCorrection", "default": true},
+        "blockedBeamRunNumber":       {"$ref": "common.json#/configuration/blockedBeamRunNumber"},
+        "useThetaDepTransCorrection": {"$ref":  "common.json#/configuration/useThetaDepTransCorrection",
+                                       "default": true},
+        "DBScalingBeamRadius":    {"$ref":  "common.json#/configuration/DBScalingBeamRadius"},
+        "mmRadiusForTransmission":    {"$ref":  "common.json#/configuration/mmRadiusForTransmission"},
+        "absoluteScaleMethod":        {"$ref":  "common.json#/configuration/absoluteScaleMethod",
+                                       "default":  "direct_beam"},
+        "StandardAbsoluteScale":        {"$ref":  "common.json#/configuration/StandardAbsoluteScale",
+                                       "default": 1.0},
+
+        "numQxQyBins":             {"$ref":  "common.json#/configuration/numQxQyBins"},
+        "1DQbinType":              {"$ref":  "common.json#/configuration/1DQbinType", "default": "scalar"},
+        "QbinType": {
+          "$ref":  "common.json#/configuration/QbinType",
+          "default": "log",
+          "evaluateCondition": "('{this}' == 'linear' and {#configuration/numQBins} is not None) or ('{this}' == 'log' and (({#configuration/numQBins} is None) ^ ({#configuration/LogQBinsPerDecade} is None)))"
+        },
+        "numQBins":                {"$ref":  "common.json#/configuration/numQBins"},
+        "LogQBinsPerDecade":       {"$ref":  "common.json#/configuration/LogQBinsPerDecade"},
+        "useLogQBinsDecadeCenter": {"$ref":  "common.json#/configuration/useLogQBinsDecadeCenter", "default": false},
+        "useLogQBinsEvenDecade":   {"$ref":  "common.json#/configuration/useLogQBinsEvenDecade", "default": true},
+
+        "WedgeMinAngles":            {"$ref":  "common.json#/configuration/WedgeMinAngles"},
+        "WedgeMaxAngles":            {"$ref":  "common.json#/configuration/WedgeMaxAngles"},
+        "autoWedgeQmin":             {"$ref":  "common.json#/configuration/autoWedgeQmin", "default":  0.003},
+        "autoWedgeQmax":             {"$ref":  "common.json#/configuration/autoWedgeQmax", "default":  0.04},
+        "autoWedgeQdelta":           {"$ref":  "common.json#/configuration/autoWedgeQdelta", "default":  0.01},
+        "autoWedgeAzimuthalDelta":  {"$ref":  "common.json#/configuration/autoWedgeAzimuthalDelta", "default": 1.0},
+        "autoWedgePeakWidth":        {"$ref":  "common.json#/configuration/autoWedgePeakWidth", "default":  0.25},
+        "autoWedgeBackgroundWidth":  {"$ref":  "common.json#/configuration/autoWedgeBackgroundWidth", "default": 1.5},
+        "autoWedgeSignalToNoiseMin": {"$ref":  "common.json#/configuration/autoWedgeSignalToNoiseMin", "default": 2.0},
+        "autoWedgePeakSearchWindowSizeFactor": {"$ref":  "common.json#/configuration/autoWedgePeakSearchWindowSizeFactor", "default":  0.6},
+        "AnnularAngleBin":           {"$ref":  "common.json#/configuration/AnnularAngleBin", "default":  1.0},
+
+        "Qmin":              {"$ref":  "common.json#/configuration/Qmin"},
+        "Qmax":              {"$ref":  "common.json#/configuration/Qmax"},
+        "useErrorWeighting": {"$ref":  "common.json#/configuration/useErrorWeighting", "default": false},
+        "smearingPixelSizeX": {"$ref":  "common.json#/configuration/smearingPixelSizeX"},
+        "smearingPixelSizeY": {"$ref":  "common.json#/configuration/smearingPixelSizeY"},
+        "useSubpixels":      {"$ref":  "common.json#/configuration/useSubpixels", "default": true},
+        "subpixelsX":        {"$ref":  "common.json#/configuration/subpixelsX", "default": 5},
+        "subpixelsY":        {"$ref":  "common.json#/configuration/subpixelsY", "default": 5}
+      },
+      "maxProperties": 58,
+      "required": ["outputDir", "wavelength", "wavelengthSpread", "useTimeSlice", "timeSliceInterval",
+        "useLogSlice", "logSliceName", "logSliceInterval", "sampleOffset",
+        "useDetectorOffset", "detectorOffset", "sampleDetectorDistance",
+        "sampleToSi", "sampleApertureSize", "sourceApertureDiameter",
+        "usePixelCalibration", "maskFileName", "useDefaultMask", "defaultMask",
+        "useMaskBackTubes", "darkFileName", "normalization", "normalizationResortToTime",
+        "sensitivityFileName", "useSolidAngleCorrection", "blockedBeamRunNumber",
+        "useThetaDepTransCorrection", "DBScalingBeamRadius", "mmRadiusForTransmission", "absoluteScaleMethod",
+        "StandardAbsoluteScale", "numQxQyBins", "1DQbinType", "QbinType", "numQBins", "LogQBinsPerDecade",
+        "useLogQBinsDecadeCenter", "useLogQBinsEvenDecade", "WedgeMinAngles", "WedgeMaxAngles",
+        "autoWedgeQmin", "autoWedgeQmax", "autoWedgeQdelta", "autoWedgeAzimuthalDelta",
+        "autoWedgePeakWidth", "autoWedgeBackgroundWidth", "autoWedgeSignalToNoiseMin", "AnnularAngleBin",
+        "Qmin", "Qmax", "useErrorWeighting", "smearingPixelSizeX", "smearingPixelSizeY",
+        "useSubpixels", "subpixelsX", "subpixelsY"]
+    }
+  },
+  "maxProperties": 10,
+  "required": ["schemaStamp", "instrumentName", "iptsNumber", "dataDirectories", "sample", "background",
+    "emptyTransmission", "beamCenter", "outputFileName", "configuration"]
+}

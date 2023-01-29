@@ -1,0 +1,72 @@
+{
+    "instrumentName": "CG3",
+    "iptsNumber": "23782",
+    "runNumber": "4822",
+    "thickness": "0.1",
+    "outputFileName": "CG3_4822",
+    "transmission": {
+        "runNumber": "4822",
+        "value": ""
+    },
+    "background": {
+        "runNumber": "4821",
+        "transmission": {
+            "runNumber": "4821",
+            "value": ""
+        }
+    },
+    "beamCenter": {
+        "runNumber": "4819"
+    },
+    "emptyTrans": {
+        "runNumber": "4820"
+    },
+    "configuration": {
+        "outputDir": "/HFIR/CG3/shared/UserAcceptance/SVP_s6v",
+        "sampleApertureSize":"12",
+        "maskFileName": "",
+        "useMaskFileName": false,
+        "useDefaultMask": true,
+        "DefaultMask":["{'Pixel':'1-18,239-256'}", "{'Bank':'18-24,42-48'}"],
+        "blockedBeamFileName": "",
+        "darkMainFileName": "/HFIR/CG3/shared/Cycle486/CG3_5187.nxs.h5",   
+        "darkWingFileName": "/HFIR/CG3/shared/Cycle486/CG3_5187.nxs.h5",    
+        "useDarkFileName": true,
+        "sensitivityMainFileName": "/HFIR/CG3/shared/Cycle486/sens_f4829m7p0_TDC_SAC.h5",
+        "sensitivityWingFileName": "/HFIR/CG3/shared/Cycle486/sens_f4843w1p4_TDC_SAC.h5",
+        "useSensitivityFileName": true,
+        "UseBarScan": true,
+        "BarScanMainFileName":"",
+        "BarScanWingFileName":"",
+        "absoluteScaleMethod":"standard",
+        "DBScalingBeamRadius": "",
+        "StandardAbsoluteScale": "2e-8",
+        "normalization": "Monitor",
+        "sampleOffset": "",
+        "useSampleOffset": false,
+        "useSolidAngleCorrection": true,
+        "useThetaDepTransCorrection": true,
+        "mmRadiusForTransmission": "",
+        "numMainQxQyBins": 150,
+        "numWingQxQyBins": 150,
+        "1DQbinType": "scalar",
+        "QbinType": "log",
+        "WedgeMinAngles": "-30, 60",
+        "WedgeMaxAngles": "30, 120",
+        "numMainQBins": 33,
+        "numWingQBins": 33,
+        "LogQBinsPerDecadeMain": "",
+        "LogQBinsPerDecadeWing": "",
+        "LogQBinsDecadeCenter": false,
+        "LogQBinsEvenDecade": false,
+        "AnnularAngleBin": "1",
+        "Qmin": "",
+        "Qmax": "",
+        "useErrorWeighting": true,
+        "useMaskBackTubes": false,
+        "wavelength": "",
+        "wavelengthSpread": "",
+        "overlapStitchQmin": 0.03,
+        "overlapStitchQmax": 0.0375
+    }
+}
